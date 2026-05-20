@@ -234,7 +234,7 @@ Three flag mistakes that are not documented anywhere and took significant time t
 |---|---|---|---|
 | CT70 QCS6690 Hex780 | ✗ Fails | 0x138d vtcm unsupported | Restriction for unsigned PD VTCM below 4MB |
 | CT47 QCS6490 Hex770 | ✗ Fails | 0x138d vtcm unsupported | Same firmware restriction |
-| S21 SM8450 Hex780 | ✓ Works | — | Consumer firmware, no VTCM restriction |
+| S21 SM8450 Hex780 | ✓ Works | Quality??? | Consumer firmware, no VTCM restriction |
 | OPPO6 SN870 Hex698 | ✗ N/A | — | No HTP silicon — HVX only |
 
 YOLO11s requires exactly 4MB VTCM on Hexagon HTP. `--vtcm_override 1` and `--vtcm_override 2` in `snpe-dlc-graph-prepare` are silently ignored — the model's minimum cannot be reduced below what the graph optimizer determines it needs. Both YOLO11n and YOLO11s produce `vtcmSize: 4` regardless of the override value.
@@ -289,7 +289,7 @@ The screenshot from that video — all four devices detecting the same scene sim
 
 ## Future Outlook (2026–2030)
 
-Eight years between articles is too long. Here is what needs to happen in the next four. First three are my predictions or my wishes, last two is what “claude” is expecting
+Eight years between articles is too long. Here is what needs to happen in the next four. Five wishes or five predictions which would help to develop computer vision solutions on the edge.
 
 ### Prediction 1: NPU-Native OS Buffers (my wish)
 
@@ -325,7 +325,7 @@ Eight years between articles is too long. Here is what needs to happen in the ne
 
 **•	The Premise:** Over eight years, NNAPI on industrial enterprise Qualcomm system stacks has been a mirage, defaulting to clean model compilation only to silently redirect execution pipeline graphs to the host CPU cores.
 
-**•	The Vision:** Future Android CDD (Compatibility Definition Document) revisions must man-date that any SoC marketed with "artificial intelligence" silicon has a non-optional, CTS-verified hardware delegation path through NNAPI. Accelerated execution must stop being a marketing gimmick or a firmware mystery.
+**•	The Vision:** Future Android CDD (Compatibility Definition Document) revisions should man-date that any SoC marketed with "artificial intelligence" silicon has a non-optional, CTS-verified hardware delegation path through NNAPI. Accelerated execution must stop being a marketing gimmick or a firmware mystery.
 
 
 ---
