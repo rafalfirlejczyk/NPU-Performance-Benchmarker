@@ -70,13 +70,13 @@ These are not directly comparable tasks — detection is harder, the model is la
 
 Two Honeywell industrial Android mobile computers, "scanners" — devices you would find in enterprise, factory, store or warehouse, not in a consumer phone store:
 
-**CT70** — QCS6690 (Snapdragon 778G industrial variant), Hexagon 780 HTP, Adreno 643L, Android 15. Built for rugged scanning environments, not for ML benchmarks.
+**CT70** — QCS6690 (Snapdragon 778G industrial variant), Hexagon 780 HTP, Adreno 643L, Android 15. Built for rugged scanning environments, not for ML benchmarks, but I wanted to check it how far could it go.
 
-**CT47** — QCS6490 (Snapdragon 695 industrial variant), Hexagon 770 HTP, Adreno 643, Android 15. Slightly older silicon, slightly lower TDP.
+**CT47** — QCS6490 (Snapdragon 695 industrial variant), Hexagon 770 HTP, Adreno 643, Android 15. Rugged, slightly older silicon, slightly lower TDP, less expensive, will it perform in CV project?
 
 Both devices run Honeywell industrial firmware, which introduces constraints not present on consumer devices — particularly around DSP access and NNAPI.
 
-For reference, two additional consumer/semi-industrial devices were measured:
+For reference, two additional consumer devices were measured:
 
 **Samsung S21** — SM8450 (Snapdragon 8 Gen 1), Hexagon 780 HTP (same generation as CT70 QCS6690). Consumer flagship, higher sustained clock budget.
 
@@ -96,7 +96,7 @@ Two datasets:
 
 **COCO80** — standard 80-class COCO detection model, publicly available weights from Ultralytics.
 
-**box-4class** — a custom model trained on a proprietary box damage dataset with 4 classes (2 real + 2 dummy to satisfy the GPU output channel rule described below). Smaller output tensor: 8 channels (4 coords + 4 classes) vs 84 channels (4 coords + 80 classes).
+**box-4class** — a custom model trained on a proprietary box damage dataset (1700 images only) with 4 classes (2 real + 2 dummy to satisfy the GPU output channel rule described below). Smaller output tensor: 8 channels (4 coords + 4 classes) vs 84 channels (4 coords + 80 classes).
 
 All models were exported from Ultralytics `.pt` weights.
 
@@ -111,13 +111,13 @@ All inference times are **model-only** (no pre-processing, no post-processing, n
 | Device | SoC | YOLO11n COCO | YOLO11n box | YOLO11s COCO | YOLO11s box |
 |---|---|---|---|---|---|
 | CT47 | QCS6490 Hex770 | 4.7 ms | **4.5 ms** | 9 ms | 8 ms |
-| CT70 | QCS6690 Hex780 | 6 ms | 5 ms | 10 ms | 10 ms |
-| S21 | SM8450 Hex780 | 2.8 ms | **2.5 ms** | — | 3.5 ms |
+| CT70 | QCS6690 Hex780 | 6 ms | 5 ms | 12 ms | 12 ms |
+| S21 | SM8450 Hex780 | 2.9 ms | **2.8 ms** | — | 3.5 ms |
 | OPPO6 | unknown | 40 ms | 37 ms | 59 ms | 57 ms |
 
 CT47 is faster than CT70 on DSP for YOLO11n (4.5 ms vs 5 ms). This is counterintuitive — QCS6690 has a newer Hexagon generation. The likely explanation is clock budget: CT47's industrial thermal envelope may sustain higher HTP clocks for the duration of a single inference burst. This was not confirmed by direct clock readout (`/sys/kernel/gpu/gpu_clock` equivalent for HTP) and remains an open question.
 
-The S21 result (2.5 ms on Hexagon 780) confirms that the same Hexagon 780 silicon can run faster on a consumer device with a higher power budget.
+The S21 result (2.8 ms on Hexagon 780) confirms that the same Hexagon 780 silicon can run faster on a consumer device with a higher power budget.
 
 The OPPO6 result (37–57 ms) reflects an older Hexagon generation without HMX units. It is included to show that the 4.5 ms CT47 result is not universal — it requires specific HTP silicon.
 
@@ -331,7 +331,7 @@ In 2018 the question was: *is the extra effort worth it?* The answer was: barely
 
 In 2026 the answer is: yes, unambiguously, if you accept the cost.
 
-The hardware improved by roughly 20×. A real-time object detector with 80 classes and 6.5 GFLOPs runs in 4.5ms on a Hexagon 770 that fits in a warehouse scanner. The same task would have taken 450ms on the hardware available in 2018.
+The hardware improved by roughly 20×. A real-time object detector with 80 classes and 6.5 GFLOPs runs in 4.5ms on a Hexagon 770 that fits in a "warehouse scanner". The same task would have taken 450ms on the hardware available in 2018.
 
 The software complexity grew at the same pace. Seven-step conversion pipeline. Version-locked SDK triplets. SELinux workarounds. GPU output channel alignment rules. Calibration trade-offs that silently break GPU delegation. NNAPI that quietly routes to CPU. A four-week investigation into a context binary path that ultimately cannot match the quality of on-device compilation.
 
