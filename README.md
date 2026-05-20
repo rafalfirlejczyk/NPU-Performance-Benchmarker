@@ -110,9 +110,9 @@ All inference times are **model-only** (no pre-processing, no post-processing, n
 
 | Device | SoC | YOLO11n COCO | YOLO11n box | YOLO11s COCO | YOLO11s box |
 |---|---|---|---|---|---|
-| CT47 | QCS6490 Hex770 | 4.7 ms | **4.5 ms** | 9 ms | 8 ms |
+| CT47 | QCS6490 Hex770 | 4.7 ms | **4.5 ms** | 9 ms | 9 ms |
 | CT70 | QCS6690 Hex780 | 6 ms | 5 ms | 12 ms | 12 ms |
-| S21 | SM8450 Hex780 | 2.9 ms | **2.8 ms** | — | 3.5 ms |
+| S21 | SM8450 Hex780 | 2.9 ms | **2.8 ms** | 3.5 ms | 3.5 ms |
 | OPPO6 | unknown | 40 ms | 37 ms | 59 ms | 57 ms |
 
 CT47 is faster than CT70 on DSP for YOLO11n (4.5 ms vs 5 ms). This is counterintuitive — QCS6690 has a newer Hexagon generation. The likely explanation is clock budget: CT47's industrial thermal envelope may sustain higher HTP clocks for the duration of a single inference burst. This was not confirmed by direct clock readout (`/sys/kernel/gpu/gpu_clock` equivalent for HTP) and remains an open question.
