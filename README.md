@@ -387,6 +387,6 @@ qnn-context-binary-generator \
 
 *Part 1 (2018): [Computer Vision Application on Mobile Device](https://medium.com/@firlejczyk/computer-vision-application-on-mobile-device-392ad3a6b26a)*
 
-*Source code and WSL scripts: [GitHub repository link][(https://github.com/rafalfirlejczyk/NPU-Performance-Benchmarker)*
+*Source code and WSL scripts: [GitHub repository link](https://github.com/rafalfirlejczyk/NPU-Performance-Benchmarker)*
 
 *Tags: Qualcomm DSP, Hexagon HTP, YOLO11, Android, SNPE, QNN, Object Detection, Edge AI, Industrial AI, Honeywell CT70, CT47*
