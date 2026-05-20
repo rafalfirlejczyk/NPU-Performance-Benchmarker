@@ -68,7 +68,7 @@ These are not directly comparable tasks — detection is harder, the model is la
 
 ## The Devices
 
-Two Honeywell industrial Android scanners — devices you would find in a warehouse, not a consumer phone store:
+Two Honeywell industrial Android mobile computers, "scanners" — devices you would find in enterprise, factory, store or warehouse, not in a consumer phone store:
 
 **CT70** — QCS6690 (Snapdragon 778G industrial variant), Hexagon 780 HTP, Adreno 643L, Android 15. Built for rugged scanning environments, not for ML benchmarks.
 
@@ -163,7 +163,7 @@ SNPE needs to read the Snapdragon SKU from sysfs to select the correct DSP routi
 
 ### NNAPI — 500ms, always CPU
 
-NNAPI times on CT70 and CT47 match CPU times exactly. The NNAPI delegate initialises, accepts the model, and then quietly executes on CPU. This is confirmed by timing: 275 ms for YOLO11n NNAPI matches 275 ms for float32 CPU on CT47. Honeywell industrial firmware does not expose the HTP to NNAPI. This was true in 2018 on SD660 and remains true in 2026.
+NNAPI times on CT70 and CT47 match CPU times exactly. The NNAPI delegate initialises, accepts the model, and then quietly executes on CPU. This is confirmed by timing: 275 ms for YOLO11n NNAPI matches 275 ms for float32 CPU on CT47. Industrial firmware does not expose the HTP to NNAPI. This was true in 2018 on SD660 and remains true in 2026.
 
 ### SDK version locking
 
@@ -232,7 +232,7 @@ Three flag mistakes that are not documented anywhere and took significant time t
 
 | Device | Result | Error | Root cause |
 |---|---|---|---|
-| CT70 QCS6690 Hex780 | ✗ Fails | 0x138d vtcm unsupported | Honeywell restricts unsigned PD VTCM below 4MB |
+| CT70 QCS6690 Hex780 | ✗ Fails | 0x138d vtcm unsupported | Restriction for unsigned PD VTCM below 4MB |
 | CT47 QCS6490 Hex770 | ✗ Fails | 0x138d vtcm unsupported | Same firmware restriction |
 | S21 SM8450 Hex780 | ✓ Works | — | Consumer firmware, no VTCM restriction |
 | OPPO6 SN870 Hex698 | ✗ N/A | — | No HTP silicon — HVX only |
