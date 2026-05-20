@@ -60,7 +60,7 @@ Each branch has its own export parameters, quantization quirks, and failure mode
 
 2018: image classification (Inception V3, 1000 classes, 299×299, static JPEG files).
 
-2026: real-time object detection (YOLO11n/s, custom box damage model with 4 classes, 640×640, live camera at 30fps).
+2026: real-time object detection (YOLO11n/s original pretrained model on Coco80 and custom model YOLO11n/s model of damaged boxes pretrained on 1700 images of box with 4 classes, 640×640, live camera at 30fps).
 
 These are not directly comparable tasks — detection is harder, the model is larger, the resolution is higher, and the measurement is model-only inference time per frame rather than total batch time. The comparison is still valid as a measure of progress: can the hardware run modern detection models in real time?
 
@@ -80,7 +80,7 @@ For reference, two additional consumer/semi-industrial devices were measured:
 
 **Samsung S21** — SM8450 (Snapdragon 8 Gen 1), Hexagon 780 HTP (same generation as CT70 QCS6690). Consumer flagship, higher sustained clock budget.
 
-**OPPO6** — older Hexagon generation, exact SoC unconfirmed.
+**OPPO6** — SN870 Octa-core, older Hexagon generation.
 
 ---
 
@@ -113,7 +113,7 @@ All inference times are **model-only** (no pre-processing, no post-processing, n
 | CT47 | QCS6490 Hex770 | 4.7 ms | **4.5 ms** | 9 ms | 8 ms |
 | CT70 | QCS6690 Hex780 | 6 ms | 5 ms | 10 ms | 10 ms |
 | S21 | SM8450 Hex780 | 2.8 ms | **2.5 ms** | — | 3.5 ms |
-| OPPO6 | unknown | 40 ms | 37 ms | 60 ms | 57 ms |
+| OPPO6 | unknown | 40 ms | 37 ms | 59 ms | 57 ms |
 
 CT47 is faster than CT70 on DSP for YOLO11n (4.5 ms vs 5 ms). This is counterintuitive — QCS6690 has a newer Hexagon generation. The likely explanation is clock budget: CT47's industrial thermal envelope may sustain higher HTP clocks for the duration of a single inference burst. This was not confirmed by direct clock readout (`/sys/kernel/gpu/gpu_clock` equivalent for HTP) and remains an open question.
 
@@ -125,8 +125,8 @@ The OPPO6 result (37–57 ms) reflects an older Hexagon generation without HMX u
 
 | Export | CPU | GPU | NNAPI |
 |---|---|---|---|
-| float32 | 200 ms | 55 ms | 273 ms (CPU fallback) |
-| float16 | 200 ms | **50 ms** | 275 ms (CPU fallback) |
+| float32 | 200 ms | 82 ms | 273 ms (CPU fallback) |
+| float16 | 200 ms | **45 ms** | 275 ms (CPU fallback) |
 | int8 (calibrated) | **110 ms** | 104 ms (CPU fallback*) | 165 ms |
 | integer_quant | 70 ms | 55 ms | 91 ms |
 
@@ -140,10 +140,10 @@ NNAPI times match CPU times exactly on CT70 and CT47. On both devices, NNAPI rou
 |---|---|---|---|---|---|
 | 2018 | SD660 Hex680 | Inception V3 | 975 ms | 86 ms | **11×** |
 | 2026 | CT70 QCS6690 | YOLO11n | 200 ms | 6 ms | **33×** |
-| 2026 | CT47 QCS6490 | YOLO11n | 120 ms | 4.7 ms | **26×** |
-| 2026 | S21 SM8450 | YOLO11n | — | 2.8 ms | — |
+| 2026 | CT47 QCS6490 | YOLO11n | 120 ms | 4.7 ms | **52×** |
+| 2026 | S21 SM8450 | YOLO11n | 195 ms | 2.8 ms | **69×** |
 
-The DSP advantage grew from 11× to 26–33×. This is partly hardware (HMX vs scalar DSP), partly model (YOLO11n is more matrix-multiply-heavy than Inception V3's depthwise separable convolutions which are less HMX-friendly), and partly software (SNPE HTP optimization pipeline improved significantly over 8 years).
+The DSP advantage grew from 11× to 33–69×. This is partly hardware (HMX vs scalar DSP), partly model (YOLO11n is more matrix-multiply-heavy than Inception V3's depthwise separable convolutions which are less HMX-friendly), and partly software (SNPE HTP optimization pipeline improved significantly over 8 years).
 
 ---
 
@@ -159,7 +159,7 @@ The first DSP attempt produced Error 73: `BAD_HANDLE`. Logcat showed:
 avc: denied { read } for name="sku" dev="sysfs" ... tclass=file permissive=0
 ```
 
-SNPE needs to read the Snapdragon SKU from sysfs to select the correct DSP routing. On Honeywell CT70/CT47, SELinux in enforcing mode denies this. The symptom is silent CPU fallback — inference runs at CPU speed with no error message at the app level. The fix: call `setUnsignedPD(true)` and set `ADSP_LIBRARY_PATH` with semicolon separators before instantiating the neural network builder. The exact sequence matters. This took approximately one week to diagnose.
+SNPE needs to read the Snapdragon SKU from sysfs to select the correct DSP routing. On CT70/CT47, SELinux in enforcing mode denies this. The symptom is silent CPU fallback — inference runs at CPU speed with no error message at the app level. The fix: call `setUnsignedPD(true)` and set `ADSP_LIBRARY_PATH` with semicolon separators before instantiating the neural network builder. The exact sequence matters. This took approximately three days to diagnose.
 
 ### NNAPI — 500ms, always CPU
 
@@ -235,15 +235,15 @@ Three flag mistakes that are not documented anywhere and took significant time t
 | CT70 QCS6690 Hex780 | ✗ Fails | 0x138d vtcm unsupported | Honeywell restricts unsigned PD VTCM below 4MB |
 | CT47 QCS6490 Hex770 | ✗ Fails | 0x138d vtcm unsupported | Same firmware restriction |
 | S21 SM8450 Hex780 | ✓ Works | — | Consumer firmware, no VTCM restriction |
-| OPPO6 SM8250 Hex698 | ✗ N/A | — | No HTP silicon — HVX only |
+| OPPO6 SN870 Hex698 | ✗ N/A | — | No HTP silicon — HVX only |
 
 YOLO11s requires exactly 4MB VTCM on Hexagon HTP. `--vtcm_override 1` and `--vtcm_override 2` in `snpe-dlc-graph-prepare` are silently ignored — the model's minimum cannot be reduced below what the graph optimizer determines it needs. Both YOLO11n and YOLO11s produce `vtcmSize: 4` regardless of the override value.
 
 The DLC path works on Honeywell devices because SNPE's on-device compiler negotiates VTCM with the actual firmware at compilation time. The `.bin` path has no equivalent negotiation — it bakes in the theoretical maximum and the device rejects it.
 
-**On Samsung S21, the `.bin` path works.** Context creation succeeds, graph is retrieved, inference runs. Init time on S21: ~17ms for binary loading, ~165ms total including FastRPC DSP channel setup. The FastRPC setup is unavoidable on both paths — it is not a compilation step. The `.bin` advantage over the DLC path only exists when using a raw uncompiled DLC (skipping `snpe-dlc-graph-prepare`); in that case the DLC path takes ~4000ms while the `.bin` path still takes ~180ms.
+**On Samsung S21, the `.bin` path works, but class confidence values are too low to match SNPE quality.** Context creation succeeds, graph is retrieved, inference runs. Init time on S21: ~17ms for binary loading, ~165ms total including FastRPC DSP channel setup. The FastRPC setup is unavoidable on both paths — it is not a compilation step. The `.bin` advantage over the DLC path only exists when using a raw uncompiled DLC (skipping `snpe-dlc-graph-prepare`); in that case the DLC path takes ~4000ms while the `.bin` path still takes ~180ms.
 
-**Conclusion:** For Honeywell industrial devices, use the DLC path. For consumer Snapdragon devices, the `.bin` path works and eliminates the need for on-device compilation.
+**Conclusion:** For Honeywell industrial devices, use the DLC path. For consumer Snapdragon devices, the .bin path may work and will eliminates the need for on-device compilation. Investigation on class detection has to be done to get acceptable detection quality.
 
 ---
 
@@ -253,10 +253,10 @@ YOLO11s has 3.3× more FLOPs than YOLO11n (21.5 vs 6.5 GFLOPs). On DSP, the infe
 
 | Device | 11n | 11s | Ratio |
 |---|---|---|---|
-| CT47 DSP | 4.5 ms | 8 ms | **1.8×** |
+| CT47 DSP | 4.5 ms | 8 ms | **1.9×** |
 | CT70 DSP | 5 ms | 10 ms | **2.0×** |
 
-The ~1.7×–2× measured speedup vs 3.3× expected from FLOPs indicates the DSP is bandwidth-limited on YOLO11n: the HMX compute units are waiting for data from LPDDR4X memory. YOLO11s reaches closer to the compute bound. Both models run in real time at 30fps — the distinction matters only if power consumption is the primary constraint.
+The ~1.9×–2× measured speedup vs 3.3× expected from FLOPs indicates the DSP is bandwidth-limited on YOLO11n: the HMX compute units are waiting for data from LPDDR4X memory. YOLO11s reaches closer to the compute bound. Both models run in real time at 30fps.
 
 ---
 
@@ -266,7 +266,7 @@ The answer to the 2018 question — *"is the extra effort worth it?"* — is now
 
 In 2018, DSP was 11× faster than CPU for a classification task on Hexagon 680. The effort was: install SNPE SDK, convert model to DLC, run `snpe-net-run`. That is roughly two days of work.
 
-In 2026, DSP is 26–33× faster than CPU for real-time object detection on Hexagon 770/780. YOLO11n runs in **4.5 ms** on a QCS6490 industrial scanner. The effort was: eight weeks of debugging, SDK version matching, SELinux workarounds, GPU calibration root-cause analysis, and JNI layer implementation. That is not two days.
+In 2026, DSP is 33–69× faster than CPU for real-time object detection on Hexagon 770/780. YOLO11n runs in **4.5 ms** on a QCS6490 industrial scanner. The effort was: eight weeks of debugging, SDK version matching, SELinux workarounds, GPU calibration root-cause analysis, and JNI layer implementation. That is not two days.
 
 The hardware improved dramatically. The software complexity grew at roughly the same pace in the opposite direction.
 
@@ -287,25 +287,25 @@ The screenshot from that video — all four devices detecting the same scene sim
 
 ## Future Outlook (2026–2030)
 
-Eight years between articles is too long. Here is what needs to happen in the next four.
+Eight years between articles is too long. Here is what needs to happen in the next four. First three are my predictions or my wishes, last two is what “claude” is expecting
 
-### Prediction 1: NPU-Native OS Buffers (the user's wish)
+### Prediction 1: NPU-Native OS Buffers (my wish)
 
 Android's SurfaceFlinger still passes camera frames through a CPU-readable buffer before handing them to any ML runtime. Every pipeline measured in this article pays a resize, a pixel-extraction loop, and a ByteBuffer allocation on the CPU before a single DSP cycle runs. The logical endpoint is a camera HAL that writes directly into a format the HTP can consume — typed tensor buffers that live in secure enclave memory and never touch the application processor. Zero-copy from sensor to inference. This would eliminate 15–30ms of the total pipeline time measured here regardless of which inference path is used.
 
 The `.bin` path — or any simplified host-compiled path — working out of the box on all devices is a prerequisite for this to be useful. As documented in this article, a host-compiled binary fails on industrial firmware due to VTCM negotiation. That cannot be fixed by the application developer. It requires the OS to broker memory allocation between the compiler and the firmware — which is exactly what SNPE does at runtime today, manually, per-device.
 
-### Prediction 2: On-Device LoRA Fine-Tuning for Vision (the user's wish)
+### Prediction 2: On-Device LoRA Fine-Tuning for Vision (my wish)
 
 YOLO heads are small. The detection head for YOLO11n is a few hundred thousand parameters — well within what a Hexagon 780 can process for gradient computation at interactive latency. The infrastructure is already partially there: Qualcomm AI Hub runs model compilation on-device; the QNN HTP can do backward passes in principle.
 
-The practical wish: a YOLO11 detection head that fine-tunes itself overnight on locally collected images, using on-device HTP kernels, without the model weights ever leaving the device. For industrial scanning — the specific use case of the CT70 and CT47 — this would mean the box damage detector learns the specific lens profile, lighting conditions, and box surface textures of each warehouse without any labelling overhead. The domain gap between COCO training and industrial deployment is the single largest quality bottleneck today. On-device LoRA could close it.
+My practical wish: a YOLO11 detection head that fine-tunes itself overnight on locally collected images, using on-device HTP kernels, without the model weights ever leaving the device. For industrial scanning — the specific use case of the CT70 and CT47 — this would mean the box damage detector learns the specific lens profile, lighting conditions, and box surface textures of each warehouse without any labelling overhead. The domain gap between COCO training and industrial deployment is the single largest quality bottleneck today. On-device LoRA could close it.
 
-### Prediction 3: The End of the Format War (the user's wish)
+### Prediction 3: The End of the Format War (my wish)
 
 The toolchain used in this article: PyTorch → Ultralytics YOLO → ONNX → TFLite (snpe-tflite-to-dlc) or ONNX (snpe-onnx-to-dlc) → snpe-dlc-quantize → snpe-dlc-graph-prepare → QNN context binary. Seven steps. Three different intermediate representations. Two conversion tools that produce different results for the same model. One tool that fails on YOLO11's C2f backbone entirely.
 
-The user's prediction is right: ONNX Runtime's QNN Execution Provider — or whatever wins the convergence race — will eventually become the abstraction layer that makes this pipeline invisible. You will describe a model, a device, and a latency target, and the runtime will handle the rest. SNPE/DLC will be remembered the way people remember writing device-specific OpenGL extensions — correct for its time, necessary for performance, ultimately replaced by a higher-level API that was good enough and universal.
+I hope my prediction is right: ONNX Runtime's QNN Execution Provider — or whatever wins the convergence race — will eventually become the abstraction layer that makes this pipeline invisible. You will describe a model, a device, and a latency target, and the runtime will handle the rest. SNPE/DLC will be remembered the way people remember writing device-specific OpenGL extensions — correct for its time, necessary for performance, ultimately replaced by a higher-level API that was good enough and universal.
 
 ### Prediction 4: Calibration data stays on device (Claude's addition)
 
@@ -345,9 +345,9 @@ Part 3 will not take eight years.
 
 **Devices tested:**
 - Honeywell CT70: QCS6690, Hexagon 780 HTP, Adreno 643L, Android 15, soc_id=658
-- Honeywell CT47: QCS6490, Hexagon 770 HTP, Adreno 643, Android 15
+- Honeywell CT47: QCS6490, Hexagon 770 HTP, Adreno 643, Android 15, soc_id=497
 - Samsung Galaxy S21 (SM-S908x): SM8450, Hexagon 780 HTP, Android 14, soc_id=457
-- OPPO (CPH2247): SM8250 (Snapdragon 865, kona), Hexagon 698 HVX, soc_id=356
+- OPPO (CPH2247): SN8250 (Snapdragon 870, kona), Hexagon 698 HVX, soc_id=356
 
 **SDK:** Qualcomm QAIRT 2.45.40.260406 (formerly SNPE / QNN AI Engine Direct)
 
