@@ -7,7 +7,7 @@
 
 **Nov 2018.** I ran Inception V3 on a Snapdragon SD660 and measured how fast a DSP can classify 1000 images compared to CPU and GPU. The conclusion: DSP is 11× faster than CPU. NNAPI was not yet supported. The extra effort was worth it — barely.
 
-**May 2026.** I am running YOLO11n and Yolo11s on Honeywell CT70 and CT47 industrial scanners — Snapdragon QCS6690 and QCS6490, Hexagon 780 and 770 HTP — and detecting objects in real time. DSP inference: **4.5 ms**. That is one frame every 4.5 milliseconds for the model alone.
+**May 2026.** I am running YOLO11n and YOLO11s on Honeywell CT70 and CT47 industrial scanners — Snapdragon QCS6690 and QCS6490, Hexagon 780 and 770 HTP — and detecting objects in real time. DSP inference: **4.5 ms**. That is one frame every 4.5 milliseconds for the model alone.
 
 This article documents what changed, what did not, and what it costs in engineering effort to get there.
 
