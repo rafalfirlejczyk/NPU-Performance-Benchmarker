@@ -283,7 +283,7 @@ What improved: the result. 4.5 ms per frame, real-time detection, a model far mo
 
 <img width="1900" height="964" alt="image" src="https://github.com/user-attachments/assets/2f2756d8-9cb9-448f-8cec-f344d84ee530" />
 
-The screenshot from that video — all four devices detecting the same scene simultaneously — is the clearest summary of eight years of progress. CT47 Hexagon 770 at 37ms, CT70 Hexagon 780 at 22ms, OPPO Hexagon 698 at 84ms, Samsung S21 Hexagon 780 at 20ms. The OPPO result is the pre-HTP baseline: same SDK, four times slower, no HMX units.
+The screenshot from that video — all four devices detecting the same scene simultaneously — is the clearest summary of eight years of progress. CT47 Hexagon 770 at 31ms, CT70 Hexagon 780 at 20ms, OPPO Hexagon 698 at 85ms, Samsung S21 Hexagon 780 at 21ms. The OPPO result is the pre-HTP baseline: same SDK, four times slower, no HMX units.
 
 ---
 
