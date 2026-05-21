@@ -128,7 +128,7 @@ All times shown as **total pipeline ; model-only** in milliseconds. Total includ
 | CT70 QCS6690 | 605; **585** | 190; **170** | 155; **105** | 26; **12** | 26; **12** |
 | CT47 QCS6490 | 725; **702** | 225; **200** | 140; **103** | 25; **9** | 22; **9** |
 | S21 SM8450 | 545; **522** | 165; **145** | 160; **129** | 20; **3.5** | 32; **3.5** |
-| OPPO SM8250 | 650; **630** | 210; **185** | 115; **80** | 82; **59** | 98; **57** |
+| OPPO SM8250 | 650; **630** | 210; **185** | 115; **80** | 82; **59** | 80; **57** |
 
 **Pipeline overhead** (total − model) for QNN DSP path: consistently 16–20ms across all HTP devices regardless of model size. This is the irreducible cost of FastRPC channel negotiation, pixel packing in Kotlin, and NMS post-processing. A 2.9ms model does not produce 2.9ms on-screen latency — it produces 19ms.
 
