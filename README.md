@@ -1,9 +1,9 @@
 # NPU-Performance-Benchmarker
 # Computer Vision on Mobile Device — Part 2: Eight Years of Evolution
 
-*From Image Classification on SD660 to Real-Time Object Detection on QCS6690/QCS6490
+*From Image Classification on SD660 to Real-Time Object Detection on QCS6690/QCS6490*
 
-Summary: From 11x speedups in 2018 to real-time 4.5ms inference in 2026, this research documents the transformation of mobile computer vision through the lens of industrial Snapdragon hardware. While YOLO11 on the Hexagon HTP delivers a breathtaking 50x performance leap over legacy CPU paths, the journey remains a high-effort craft defined by fragmented SDKs, SELinux roadblocks, and the persistent 'NNAPI mirage' on enterprise firmware.*
+**Summary: From 11x speedups in 2018 to real-time 4.5ms inference in 2026, this research documents the transformation of mobile computer vision through the lens of industrial Snapdragon hardware. While YOLO11 on the Hexagon HTP delivers a breathtaking 50x performance leap over legacy CPU paths, the journey remains a high-effort craft defined by fragmented SDKs, SELinux roadblocks, and the persistent 'NNAPI mirage' on enterprise firmware.**
 
 ---
 
@@ -118,7 +118,7 @@ All times shown as **total pipeline ; model-only** in milliseconds. Total includ
 |---|---|---|---|---|---|---|
 | CT70 QCS6690 | 220;200 | 120;**70** | 95;45 | 95;45 | 140;91 | 22;**6** |
 | CT47 QCS6490 | 265;245 | 120;**92** | 78;44 | 80;45 | 141;115 | 24;**4.8** |
-| S21 SM8450 | 165;~200 | 75;**55** | 70;30 | 80;**21** | 120;100 | 19;**2.5** |
+| S21 SM8450 | 165;~200 | 75;**55** | 70;30 | 80;**21** | 120;100 | 18;**2.9** |
 | OPPO SM8250 | 275;250 | 118;**85** | 75;**36** | 80;39 | 160;130 | 60;40 |
 
 #### YOLO11s — all devices, QNN DSP (coco80 ; box-4class)
@@ -132,7 +132,7 @@ All times shown as **total pipeline ; model-only** in milliseconds. Total includ
 
 **Pipeline overhead** (total − model) for QNN DSP path: consistently 16–20ms across all HTP devices regardless of model size. This is the irreducible cost of FastRPC channel negotiation, pixel packing in Kotlin, and NMS post-processing. A 2.5ms model does not produce 2.5ms on-screen latency — it produces 19ms.
 
-**Record:** S21 YOLO11n box-4class QNN DSP = **2.5ms model, 19ms total**.
+**Record:** S21 YOLO11n box-4class QNN DSP = **2.9ms model, 18ms total**.
 
 ### Key observations from the full dataset
 
@@ -153,9 +153,10 @@ The OPPO result — only 2× faster on DSP than CPU — is the pre-HTP baseline.
 
 **GPU INT8 (uncalibrated) is the fastest GPU path.** YOLO11n model-only: CT70 45ms, CT47 45ms, S21 21ms, OPPO 39ms — consistently 10–20% faster than GPU FP16. The accuracy trade-off (no calibration data) was not validated on domain images.
 
-**OPPO6 GPU is competitive with Honeywell devices.** YOLO11n FP16 GPU model time: OPPO 36ms vs CT47 44ms. The Adreno 618 in SM8250 is faster per FLOP than the Adreno 643 at this task — compensating for the absence of HTP. For GPU-bound workloads on OPPO, the lack of HTP matters less.
+**GPU INT8 (calibrated) is falling back to CPU.** Fully quantized INT8 model, after calibrated quantization will be rejected by the GPU. 
 
-The DSP advantage grew from 11× to 26–33×. This is partly hardware (HMX vs scalar DSP), partly model (YOLO11n is more matrix-multiply-heavy than Inception V3's depthwise separable convolutions which are less HMX-friendly), and partly software (SNPE HTP optimization pipeline improved significantly over 8 years).
+
+The DSP advantage grew from 11× to 26–41×. This is partly hardware (HMX vs scalar DSP), partly model (YOLO11n is more matrix-multiply-heavy than Inception V3's depthwise separable convolutions which are less HMX-friendly), and partly software (SNPE HTP optimization pipeline improved significantly over 8 years).
 
 ---
 
