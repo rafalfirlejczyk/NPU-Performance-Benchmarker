@@ -313,7 +313,7 @@ Eight years between articles is too long. Here is what needs to happen in the ne
 
 **•	The Vision:** The state of the art demands an integrated camera HAL that writes straight to typed tensor buffers residing inside Secure Enclave memory. This eliminates roughly 15–30ms of structural page-transfer latency.
 
-**•	The Engineering Barrier:** A universal host-compiled context binary (.bin) fails on custom enterprise warehouse devices because of low-level VTCM (Vector Tightly Coupled Memory) page layout negotiations. The operating system must broker page tables between compilers and firmware-dependent kernels—which is why runtime frameworks like SNPE operate SKU-by-SKU today.
+**•	The Engineering Barrier:** A universal host-compiled context binary (.bin) fails on custom enterprise warehouse devices because of low-level VTCM (Vector Tightly Coupled Memory) page layout negotiations. The operating system has to act as a translator between generic software (compilers) and highly customized hardware (firmware). Because of these deep, chip-specific differences, tools meant to run AI models on hardware (like Qualcomm's SNPE) must be built individually for every specific chip model.
 
 
 ### Prediction 2: On-Device Vision LoRA Fine-Tuning
