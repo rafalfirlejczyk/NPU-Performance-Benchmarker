@@ -318,7 +318,7 @@ Eight years between articles is too long. Here is what needs to happen in the ne
 
 ### Prediction 2: On-Device Vision LoRA Fine-Tuning
 
-**•	The Premise:** YOLO11 detection heads are incredibly compact (consisting of less than a mil-lion total parameters in neural geometry). This represents an execution profile easily handled by gradient computation threads inside modern Hexagon accelerator blocks. This allows local training on a budget without cloud data transmission, similar to your decentralized RTX 2050 PC Lora training runs.
+**•	The Premise:** YOLO11 detection heads are incredibly compact (consisting of less than a mil-lion total parameters in neural geometry). This represents an execution profile easily handled by gradient computation threads inside modern Hexagon accelerator blocks. This allows local training on a budget without cloud data transmission, similar to decentralized LoRA training you may run today on PC, equiped with the small 4GB GPU (ex.: RTX 2050).
 
 **•	The Vision:** An edge-deployed box-damage model that auto-updates itself overnight using localized on-device HTP backend backpropagation. This bridges the extreme domain gaps (lighting variation, packaging textures, camera lens distortions of individual industrial firmware SKUs) without manual labeling, keeping training weights and data completely local and safe.
 
