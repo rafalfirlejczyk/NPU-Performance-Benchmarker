@@ -108,7 +108,7 @@ All models were exported from Ultralytics `.pt` weights. Custom model were "retr
 
 All inference times are **model-only** (no pre-processing, no post-processing, no NMS). Total pipeline time (including resize, pixel extraction, NMS) is approximately 30–45 ms higher and is shown separately in the presentation but not the focus of this comparison.
 
-### Complete measurement results (total pipeline ; model-only inference time, ms)
+### Complete measurement results (total pipeline[ms] ; model-only inference time[ms])
 
 All times shown as **total pipeline ; model-only** in milliseconds. Total includes resize, pixel packing, NMS and all Kotlin/Java overhead. Model-only is pure DSP/GPU/CPU execution time. Measured after Android Studio ByteBuffer reuse and ImageAnalysis sizing optimizations.
 
@@ -116,38 +116,41 @@ All times shown as **total pipeline ; model-only** in milliseconds. Total includ
 
 | Device | CPU FP32 | CPU iquant | GPU FP16 | GPU INT8 | NPU iquant | QNN DSP |
 |---|---|---|---|---|---|---|
-| CT70 QCS6690 | 220; 200 | 120; **70** | 95; 45 | 95; 45 | 140; 91 | 22; **6** |
-| CT47 QCS6490 | 265; 245 | 120; **92** | 78; 44 | 80; 45 | 141; 115 | 24; **4.8** |
-| S21 SM8450 | 165; ~200 | 75; **55** | 70; 30 | 80; **21** | 120; 100 | 18; **2.9** |
-| OPPO SM8250 | 275; 250 | 118; **85** | 75; **36** | 80; 39 | 160; 130 | 60; 40 |
+| CT70 QCS6690 | 220; **200** | 120; **70** | 95; 45 | 95; **45** | 140; **91** | 22; **6** |
+| CT47 QCS6490 | 265; **245** | 120; **92** | 78; 44 | 80; **45** | 141; **115** | 24; **4.8** |
+| S21 SM8450 | 165; **~200** | 75; **55** | 70; 30 | 80; **21** | 120; 100 | **19**; **2.9** |
+| OPPO SM8250 | 275; **250** | 118; **85** | 75; **36** | 80; **39** | 160; 130 | 60; **40** |
 
 #### YOLO11s — all devices, QNN DSP (coco80 ; box-4class)
 
 | Device | CPU FP32 | CPU iquant | GPU FP16 | QNN DSP coco | QNN DSP box |
 |---|---|---|---|---|---|
-| CT70 QCS6690 | 605;585 | 190;**170** | 155;105 | 26;**12** | 26;**12** |
-| CT47 QCS6490 | 725;702 | 225;**200** | 140;103 | 25;**9** | 22;**9** |
-| S21 SM8450 | 545;522 | 165;**145** | 160;129 | 20;**3.5** | 32;**3.5** |
-| OPPO SM8250 | 650;630 | 210;**185** | 115;**80** | 82;**59** | 98;**57** |
+| CT70 QCS6690 | 605; **585** | 190; **170** | 155; **105** | 26; **12** | 26; **12** |
+| CT47 QCS6490 | 725; **702** | 225; **200** | 140; **103** | 25; **9** | 22; **9** |
+| S21 SM8450 | 545; **522** | 165; **145** | 160; **129** | 20; **3.5** | 32; **3.5** |
+| OPPO SM8250 | 650; **630** | 210; **185** | 115; **80** | 82; **59** | 98; **57** |
 
-**Pipeline overhead** (total − model) for QNN DSP path: consistently 16–20ms across all HTP devices regardless of model size. This is the irreducible cost of FastRPC channel negotiation, pixel packing in Kotlin, and NMS post-processing. A 2.5ms model does not produce 2.5ms on-screen latency — it produces 19ms.
+**Pipeline overhead** (total − model) for QNN DSP path: consistently 16–20ms across all HTP devices regardless of model size. This is the irreducible cost of FastRPC channel negotiation, pixel packing in Kotlin, and NMS post-processing. A 2.9ms model does not produce 2.9ms on-screen latency — it produces 19ms.
 
-**Record:** S21 YOLO11n box-4class QNN DSP = **2.9ms model, 18ms total**.
+**Record:** S21 YOLO11n box-4class QNN DSP = **2.9ms model, 19ms total**.
 
 ### Key observations from the full dataset
 
-**DSP speedup vs CPU has grown since 2018.** Comparing model-only times (apples-to-apples):
+**DSP speedup vs CPU has grown since 2018.** Comparing model-only times  (apples-to-apples):
 
 | Year | Device | Model | CPU iquant | DSP | Speedup |
 |---|---|---|---|---|---|
 | 2018 | SD660 Hex680 | Inception V3 | 975ms | 86ms | **11×** |
 | 2026 | CT70 QCS6690 | YOLO11n | 70ms | 6ms | **12×** |
+| 2026 | CT70 QCS6690 | YOLO11n | 170ms | 12ms | **14×** |
 | 2026 | CT47 QCS6490 | YOLO11n | 92ms | 4.8ms | **19×** |
 | 2026 | CT47 QCS6490 | YOLO11s | 200ms | 9ms | **22×** |
+| 2026 | S21 SM8450 | YOLO11n | 60ms | 2.9ms | **21×** |
 | 2026 | S21 SM8450 | YOLO11s | 145ms | 3.5ms | **41×** |
 | 2026 | OPPO SM8250 | YOLO11n | 85ms | 40ms | **2×** |
+| 2026 | OPPO SM8250 | YOLO11s | 185ms | 59ms | **3×** |
 
-The OPPO result — only 2× faster on DSP than CPU — is the pre-HTP baseline. Hexagon 698 (HVX) has no HMX matrix units. The 41× speedup on S21 reflects YOLO11s's compute profile: it is nearly compute-bound on the Hexagon 780 HTP, where every FLOP maps directly to an HMX instruction.
+The OPPO result — only 2×-3× faster on DSP than CPU — is the pre-HTP baseline. Hexagon 698 (HVX) has no HMX matrix units. The speedup increse for YOLO11s models and specially 41× speedup on S21 reflects YOLO11s's compute profile: it is nearly compute-bound on the Hexagon 780 HTP, where every FLOP maps directly to an HMX instruction. The bottleneck starts to be not the LPDDR4X RAM and data delivery but 256 HMX compute lanes.
 
 **NNAPI confirmed slower than CPU on every device.** NPU (NNAPI) times exceed CPU iquant times by 15–45ms on all four devices. This is NNAPI delegation overhead added on top of a CPU fallback — paying both costs simultaneously. The underlying routing never reaches the HTP.
 
@@ -157,49 +160,6 @@ The OPPO result — only 2× faster on DSP than CPU — is the pre-HTP baseline.
 
 
 The DSP advantage grew from 11× to 26–41×. This is partly hardware (HMX vs scalar DSP), partly model (YOLO11n is more matrix-multiply-heavy than Inception V3's depthwise separable convolutions which are less HMX-friendly), and partly software (SNPE HTP optimization pipeline improved significantly over 8 years).
-
----
-
-All inference times are **model-only** (no pre-processing, no post-processing, no NMS). Total pipeline time (including resize, pixel extraction, NMS) is approximately 30–45 ms higher and is shown separately in the presentation but not the focus of this comparison.
-
-### QNN DSP (Hexagon HTP via SNPE DLC)
-
-| Device | SoC | YOLO11n COCO | YOLO11n box | YOLO11s COCO | YOLO11s box |
-|---|---|---|---|---|---|
-| CT47 | QCS6490 Hex770 | 4.7 ms | **4.5 ms** | 9 ms | 9 ms |
-| CT70 | QCS6690 Hex780 | 6 ms | 5 ms | 12 ms | 12 ms |
-| S21 | SM8450 Hex780 | 2.9 ms | **2.8 ms** | 3.5 ms | 3.5 ms |
-| OPPO6 | unknown | 40 ms | 37 ms | 59 ms | 57 ms |
-
-CT47 is faster than CT70 on DSP for YOLO11n (4.5 ms vs 5 ms). This is counterintuitive — QCS6690 has a newer Hexagon generation. The likely explanation is clock budget: CT47's industrial thermal envelope may sustain higher HTP clocks for the duration of a single inference burst. This was not confirmed by direct clock readout (`/sys/kernel/gpu/gpu_clock` equivalent for HTP) and remains an open question.
-
-The S21 result (2.8 ms on Hexagon 780) confirms that the same Hexagon 780 silicon can run faster on a consumer device with a higher power budget.
-
-The OPPO6 result (37–57 ms) reflects an older Hexagon generation without HMX units. It is included to show that the 4.5 ms CT47 result is not universal — it requires specific HTP silicon.
-
-### TFLite — All Paths (CT70 YOLO11n)
-
-| Export | CPU | GPU | NNAPI |
-|---|---|---|---|
-| float32 | 200 ms | 82 ms | 273 ms (CPU fallback) |
-| float16 | 200 ms | **45 ms** | 275 ms (CPU fallback) |
-| int8 (calibrated) | **110 ms** | 104 ms (CPU fallback*) | 165 ms |
-| integer_quant | 70 ms | 55 ms | 91 ms |
-
-*GPU fallback on calibrated int8 is explained below.
-
-NNAPI times match CPU times exactly on CT70 and CT47. On both devices, NNAPI routes to CPU rather than the DSP. This is the same finding as 2018 — NNAPI still does not reach the Hexagon HTP on Honeywell industrial firmware, eight years later.
-
-### DSP speedup vs CPU (2018 vs 2026)
-
-| Year | Device | Model | CPU time | DSP time | Speedup |
-|---|---|---|---|---|---|
-| 2018 | SD660 Hex680 | Inception V3 | 975 ms | 86 ms | **11×** |
-| 2026 | CT70 QCS6690 | YOLO11n | 200 ms | 6 ms | **33×** |
-| 2026 | CT47 QCS6490 | YOLO11n | 120 ms | 4.7 ms | **52×** |
-| 2026 | S21 SM8450 | YOLO11n | 195 ms | 2.8 ms | **69×** |
-
-The DSP advantage grew from 11× to 33–69×. This is partly hardware (HMX vs scalar DSP), partly model (YOLO11n is more matrix-multiply-heavy than Inception V3's depthwise separable convolutions which are less HMX-friendly), and partly software (SNPE HTP optimization pipeline improved significantly over 8 years).
 
 ---
 
@@ -215,7 +175,7 @@ The first DSP attempt produced Error 73: `BAD_HANDLE`. Logcat showed:
 avc: denied { read } for name="sku" dev="sysfs" ... tclass=file permissive=0
 ```
 
-SNPE needs to read the Snapdragon SKU from sysfs to select the correct DSP routing. On CT70/CT47, SELinux in enforcing mode denies this. The symptom is silent CPU fallback — inference runs at CPU speed with no error message at the app level. The fix: call `setUnsignedPD(true)` and set `ADSP_LIBRARY_PATH` with semicolon separators before instantiating the neural network builder. The exact sequence matters. This took approximately three days to diagnose.
+SNPE needs to read the Snapdragon SKU from sysfs to select the correct DSP routing. On CT70/CT47, SELinux in enforcing mode denies this. The symptom is silent CPU fallback — inference runs at CPU speed with no error message at the app level. Basically, you can call it **silent performance killer**. The fix: call `setUnsignedPD(true)` and set `ADSP_LIBRARY_PATH` with semicolon separators before instantiating the neural network builder. The exact sequence matters. This took approximately three days to diagnose.
 
 ### NNAPI — 500ms, always CPU
 
