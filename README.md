@@ -96,11 +96,11 @@ Two YOLO11 variants were tested:
 
 Two datasets:
 
-**COCO80** — standard 80-class COCO detection model, publicly available weights from Ultralytics.
+**COCO80** — standard 80-class COCO dataset used to train detection model, publicly available weights from Ultralytics.
 
-**box-4class** — a custom model trained on a proprietary box damage dataset (1700 images only) with 4 classes (2 real + 2 dummy to satisfy the GPU output channel rule described below). Smaller output tensor: 8 channels (4 coords + 4 classes) vs 84 channels (4 coords + 80 classes).
+**box-4class** — a custom box damage dataset (1700 images only) with 4 classes (2 real + 2 dummy to satisfy the GPU output channel rule described below). Smaller output tensor: 8 channels (4 coords + 4 classes) vs 84 channels (4 coords + 80 classes).
 
-All models were exported from Ultralytics `.pt` weights.
+All models were exported from Ultralytics `.pt` weights. Custom model were "retrained" using box-4class dataset for 100 Epochs.
 
 ---
 
@@ -108,7 +108,7 @@ All models were exported from Ultralytics `.pt` weights.
 
 All inference times are **model-only** (no pre-processing, no post-processing, no NMS). Total pipeline time (including resize, pixel extraction, NMS) is approximately 30–45 ms higher and is shown separately in the presentation but not the focus of this comparison.
 
-### Complete measurement results (model-only inference time, ms)
+### Complete measurement results (total pipeline ; model-only inference time, ms)
 
 All times shown as **total pipeline ; model-only** in milliseconds. Total includes resize, pixel packing, NMS and all Kotlin/Java overhead. Model-only is pure DSP/GPU/CPU execution time. Measured after Android Studio ByteBuffer reuse and ImageAnalysis sizing optimizations.
 
@@ -116,10 +116,10 @@ All times shown as **total pipeline ; model-only** in milliseconds. Total includ
 
 | Device | CPU FP32 | CPU iquant | GPU FP16 | GPU INT8 | NPU iquant | QNN DSP |
 |---|---|---|---|---|---|---|
-| CT70 QCS6690 | 220;200 | 120;**70** | 95;45 | 95;45 | 140;91 | 22;**6** |
-| CT47 QCS6490 | 265;245 | 120;**92** | 78;44 | 80;45 | 141;115 | 24;**4.8** |
-| S21 SM8450 | 165;~200 | 75;**55** | 70;30 | 80;**21** | 120;100 | 18;**2.9** |
-| OPPO SM8250 | 275;250 | 118;**85** | 75;**36** | 80;39 | 160;130 | 60;40 |
+| CT70 QCS6690 | 220; 200 | 120; **70** | 95; 45 | 95; 45 | 140; 91 | 22; **6** |
+| CT47 QCS6490 | 265; 245 | 120; **92** | 78; 44 | 80; 45 | 141; 115 | 24; **4.8** |
+| S21 SM8450 | 165; ~200 | 75; **55** | 70; 30 | 80; **21** | 120; 100 | 18; **2.9** |
+| OPPO SM8250 | 275; 250 | 118; **85** | 75; **36** | 80; 39 | 160; 130 | 60; 40 |
 
 #### YOLO11s — all devices, QNN DSP (coco80 ; box-4class)
 
