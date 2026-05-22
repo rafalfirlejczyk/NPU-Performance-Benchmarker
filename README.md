@@ -324,7 +324,7 @@ Eight years between articles is too long. Here is what needs to happen in the ne
 
 ### Prediction 2: On-Device Vision LoRA Fine-Tuning
 
-**•	As of May 2026:**  The detection part (heads) of a YOLO11 model — the layer that decides "this is a box, this is damage" — is surprisingly small. It has fewer parameters than a typical spreadsheet has cells. Training just that part, rather than the whole model, is something a modern phone chip can do locally. This is the same idea behind LoRA fine-tuning, which today runs on my laptop GPU with 4GB of memory.
+**•	As of May 2026:**  The detection part (heads) of a YOLO11 model — the layer that decides "this is a "intact box", this is a "damaged box" — is surprisingly small. It has fewer parameters than a typical spreadsheet has cells. Training just that part, rather than the whole model, is something a modern phone chip can do locally. This is the same idea behind LoRA fine-tuning, which today runs on my laptop GPU with 4GB of memory.
 
 **•	The Vision:** A box-damage model deployed to a warehouse scanner that quietly improves itself overnight. It uses the frames it collected during the day — boxes it saw under the actual warehouse lighting, with the actual camera lens, in the actual packaging types that warehouse handles — to update its own weights. No images leave the device. **No one writes labels**. No data scientist is involved. The model that ships on day one gradually becomes a model tuned to that specific scanner in that specific location, without anyone touching it.
 
