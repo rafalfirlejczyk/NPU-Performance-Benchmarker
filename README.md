@@ -366,7 +366,7 @@ What has not changed in eight years: if you want the DSP, you use the dedicated 
 
 What changed: the reward is now large enough to justify the effort for real production deployments. 4.5ms inference, 20ms total pipeline, real-time detection on an industrial scanner running Android 15. That is the state of the art in 2026, documented with measurements on four devices.
 
-Part 3 will not take eight years.
+I assume part 3 of this article won't take another eight years, given the rapid pace of development in AI.
 
 ---
 
