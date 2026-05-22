@@ -309,7 +309,8 @@ Eight years between articles is too long. Here is what needs to happen in the ne
 
 ### Prediction 1: NPU-Native OS Buffers (my wish)
 
-**•	The Premise:** Android's SurfaceFlinger still routes video frames through intermediate CPU-readable buffers before handing allocations off to hardware wrappers (such as SNPE delegates). This causes severe overhead (tensor conversions, pixel extraction loops, and heap-allocated ByteBuffers) before a single NPU hardware cycle ticks.
+**•	As of May 2026:** Android's SurfaceFlinger still routes video frames through intermediate CPU-readable buffers before handing allocations off to hardware wrappers (such as SNPE delegates). This causes severe overhead (tensor conversions, pixel extraction loops, and heap-allocated ByteBuffers) before a single NPU hardware cycle ticks.
+
 
 **•	The Vision:** The state of the art demands an integrated camera HAL that writes straight to typed tensor buffers residing inside Secure Enclave memory. This eliminates roughly 15–30ms of structural page-transfer latency.
 
@@ -318,28 +319,28 @@ Eight years between articles is too long. Here is what needs to happen in the ne
 
 ### Prediction 2: On-Device Vision LoRA Fine-Tuning
 
-**•	The Premise:** YOLO11 detection heads are incredibly compact (consisting of less than a mil-lion total parameters in neural geometry). This represents an execution profile easily handled by gradient computation threads inside modern Hexagon accelerator blocks. This allows local training on a budget without cloud data transmission, similar to decentralized LoRA training you may run today on PC, equiped with the small 4GB GPU (ex.: RTX 2050).
+**•	As of May 2026:** YOLO11 detection heads are incredibly compact (consisting of less than a million total parameters in neural geometry). This represents an execution profile easily handled by gradient computation threads inside modern Hexagon accelerator blocks. This allows local training on a budget without cloud data transmission, similar to decentralized LoRA training I am running today on my PC, equiped with the small 4GB GPU (ex.: RTX 2050).
 
-**•	The Vision:** An edge-deployed box-damage model that auto-updates itself overnight using localized on-device HTP backend backpropagation. This bridges the extreme domain gaps (lighting variation, packaging textures, camera lens distortions of individual industrial firmware SKUs) without manual labeling, keeping training weights and data completely local and safe.
+**•	The Vision:** An edge-deployed box-damage model that auto-updates itself overnight using localized on-device HTP backend backpropagation. This bridges the extreme domain differences (lighting variation, packaging textures, camera lens distortions of individual industrial firmware SKUs) **without manual labeling**, keeping training weights and data completely local and safe.
 
 
 ### Prediction 3: The End of the Format War 
 
-**•	The Premise:** Overcoming the cumbersome seven-stage conversion line (PyTorch, ONNX, TFLite, DLC files) with multiple target compilers that output diverging numerical met-rics is unsustainable.
+**•	As of May 2026:** Overcoming the cumbersome seven-stage conversion line (PyTorch, ONNX, TFLite, DLC files) with multiple target compilers that output diverging numerical met-rics is unsustainable.
 
 **•	The Vision:** Pure, absolute standardization under a uniform execution block (such as ONNX Runtime's QNN Execution Provider). Standard SNPE/DLC manual conversions will eventual-ly be remembered like vendor-specific legacy OpenGL headers: necessary and revolutionary in their epoch, but eventually abstracted away by a unified runtime API
 
 
 ### Prediction 4: Context-Aware Self-Calibration on the Edge
 
-**•	The Premise:** INT8 quantization currently relies on offline calibration image tensors inside a host developer machine, producing a static compromise that ignores the raw real-world con-text of individual deployments.
+**•	As of May 2026:** INT8 quantization currently relies on offline calibration image tensors inside a host developer machine, producing a static compromise that ignores the raw real-world con-text of individual deployments.
 
 **•	The Vision:** Quantized networks that self-calibrate after initial deployment by leveraging the first 1,000 real-world frames parsed by the scanner to dynamically calculate scale coeffi-cients. Running localized post-training calibration arrays of 1,000 frames at stride-8 on the modern Hexagon HTP takes less than 10 seconds, eliminating manual, multi-warehouse da-taset calibration tasks.
 
 
 ### Prediction 5: Mandatory NNAPI NPU Routing Checkpoints
 
-**•	The Premise:** Over eight years, NNAPI on industrial enterprise Qualcomm system stacks has been a mirage, defaulting to clean model compilation only to silently redirect execution pipeline graphs to the host CPU cores.
+**•	As of May 2026:** Over eight years, NNAPI on industrial enterprise Qualcomm system stacks has been a mirage, defaulting to clean model compilation only to silently redirect execution pipeline graphs to the host CPU cores.
 
 **•	The Vision:** Future Android CDD (Compatibility Definition Document) revisions should man-date that any SoC marketed with "artificial intelligence" silicon has a non-optional, CTS-verified hardware delegation path through NNAPI. Accelerated execution must stop being a marketing gimmick or a firmware mystery.
 
