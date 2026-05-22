@@ -4,7 +4,7 @@
 *From Image Classification on SD660 to Real-Time Object Detection on QCS6690/QCS6490*
 
 **Summary: From 11x speedups in 2018 to real-time 4.5ms inference in 2026, this research documents the transformation of mobile computer vision through the lens of industrial Snapdragon hardware. While YOLO11 on the Hexagon HTP delivers a groundbreaking 50x performance leap over legacy CPU paths, edge deployment remains a high-effort craft defined by fragmented SDKs, SELinux roadblocks, and the persistent "NNAPI mirage" on custom enterprise firmware.
-As a core takeaway, using the correct native accelerator (QNN DSP) yields a remarkable 5x increase (for legacy hardware) to a 13x increase (for flagship silicon) in throughput (FPS). Conversely, calling the NPU in an unsupported configuration triggers an inevitable fallback to the CPU, decreasing performance by 20–35% compared to baseline integer CPU inference.**
+As a core takeaway, using the correct native accelerator (QNN DSP) leeds to a remarkable 5x increase (for legacy hardware) to a 13x increase (for flagship silicon) in throughput (FPS). However, calling the NPU in an unsupported configuration triggers an inevitable fallback to the CPU, decreasing performance by 20–35% compared to baseline integer CPU inference.**
 ---
 Frames per Second
 <img width="1270" height="822" alt="image" src="https://github.com/user-attachments/assets/856bc349-12f1-4a0e-a418-13931913f32b" />
