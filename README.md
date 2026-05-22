@@ -280,24 +280,6 @@ The ~1.9×–2× measured speedup vs 3.3× expected from FLOPs indicates the DSP
 
 ---
 
-## Conclusion
-
-In 2018 the question was: *is the extra effort worth it?* The answer was: barely, and only for specific workloads.
-
-In 2026 the answer is: yes, clearly, if you accept the cost.
-
-The hardware improved by roughly 20×. A real-time object detector with 80 classes and 6.5 GFLOPs runs in 4.5ms on a Hexagon 770 that fits in a "warehouse scanner". The same task would have taken 450ms on the hardware available in 2018.
-
-The software complexity grew at the same pace. Seven-step conversion pipeline. Version-locked SDK triplets. SELinux workarounds. GPU output channel alignment rules. Calibration trade-offs that silently break GPU delegation. NNAPI that quietly routes to CPU. A four-week investigation into a context binary path that ultimately cannot match the quality of on-device compilation.
-
-What has not changed in eight years: if you want the DSP, you use the dedicated SDK. NNAPI is still not the answer. The extra effort is still required.
-
-What changed: the reward is now large enough to justify the effort for real production deployments. 4.5ms inference, 20ms total pipeline, real-time detection on an industrial scanner running Android 15. That is the state of the art in 2026, documented with measurements on four devices.
-
-Part 3 will not take eight years.
-
----
-
 ## The Video
 
 *[Four Android devices (CT70, CT47, S21, Oppo6), four YOLO11s models (TFLite FP32, FP16, INT8, QNN DLC), four accelerators (CPU, GPU, NPU, HTP DSP). All in one video. Watch till the end.](https://www.youtube.com/watch?v=MQwPHHI9ICk)*
