@@ -278,18 +278,19 @@ The ~1.9×–2× measured speedup vs 3.3× expected from FLOPs indicates the DSP
 
 ## Conclusion
 
-The answer to the 2018 question — *"is the extra effort worth it?"* — is now unambiguous.
+In 2018 the question was: *is the extra effort worth it?* The answer was: barely, and only for specific workloads.
 
-In 2018, DSP was 11× faster than CPU for a classification task on Hexagon 680. The effort was: install SNPE SDK, convert model to DLC, run `snpe-net-run`. That is roughly two days of work.
+In 2026 the answer is: yes, clearly, if you accept the cost.
 
-In 2026, DSP is 33–69× faster than CPU for real-time object detection on Hexagon 770/780. YOLO11n runs in **4.5 ms** on a QCS6490 industrial scanner. The effort was: eight weeks of debugging, SDK version matching, SELinux workarounds, GPU calibration root-cause analysis, and JNI layer implementation. That is not two days.
+The hardware improved by roughly 20×. A real-time object detector with 80 classes and 6.5 GFLOPs runs in 4.5ms on a Hexagon 770 that fits in a "warehouse scanner". The same task would have taken 450ms on the hardware available in 2018.
 
-The hardware improved dramatically. The software complexity grew at roughly the same pace in the opposite direction.
+The software complexity grew at the same pace. Seven-step conversion pipeline. Version-locked SDK triplets. SELinux workarounds. GPU output channel alignment rules. Calibration trade-offs that silently break GPU delegation. NNAPI that quietly routes to CPU. A four-week investigation into a context binary path that ultimately cannot match the quality of on-device compilation.
 
-What has not changed in eight years: NNAPI still does not reach the Hexagon DSP on Qualcomm industrial firmware. It falls back to CPU as it did in 2018. The dedicated SDK — now called QAIRT instead of SNPE — remains the only practical path.
+What has not changed in eight years: if you want the DSP, you use the dedicated SDK. NNAPI is still not the answer. The extra effort is still required.
 
-What improved: the result. 4.5 ms per frame, real-time detection, a model far more capable than Inception V3, on a device that fits in a warehouse worker's hand. The extra effort is still required. So is the reward.
+What changed: the reward is now large enough to justify the effort for real production deployments. 4.5ms inference, 20ms total pipeline, real-time detection on an industrial scanner running Android 15. That is the state of the art in 2026, documented with measurements on four devices.
 
+Part 3 will not take eight years.
 
 ---
 
@@ -351,7 +352,7 @@ Eight years between articles is too long. Here is what needs to happen in the ne
 
 In 2018 the question was: *is the extra effort worth it?* The answer was: barely, and only for specific workloads.
 
-In 2026 the answer is: yes, unambiguously, if you accept the cost.
+In 2026 the answer is: yes, clearly, if you accept the cost.
 
 The hardware improved by roughly 20×. A real-time object detector with 80 classes and 6.5 GFLOPs runs in 4.5ms on a Hexagon 770 that fits in a "warehouse scanner". The same task would have taken 450ms on the hardware available in 2018.
 
