@@ -309,40 +309,40 @@ Eight years between articles is too long. Here is what needs to happen in the ne
 
 ### Prediction 1: NPU-Native OS Buffers (my wish)
 
-**•	As of May 2026:** Android's SurfaceFlinger still routes video frames through intermediate CPU-readable buffers before handing allocations off to hardware wrappers (such as SNPE delegates). This causes severe overhead (tensor conversions, pixel extraction loops, and heap-allocated ByteBuffers) before a single NPU hardware cycle ticks.
+**•	As of May 2026:** Every video frame from the camera goes through several CPU preparation steps before the DSP sees a single pixel. CameraX delivers frames in YUV format. The code resizes from 1080p to 640×640, extracts pixel values one by one, packs them into the uint8 format the model expects, and allocates a fresh 5MB ByteBuffer to hold the result — at 30fps, that is 150MB per second of short-lived heap allocations the garbage collector must eventually reclaim. Only after all of that does the DSP start its actual inference work. In the measurements in this article, these preparation steps cost 16ms on every device. The 2.5ms DSP inference on S21 delivers a 19ms total pipeline — not 2.5ms — because of this overhead.
 
+**•	The Vision:** The logical goal is for CameraX to achieve a native zero-copy path: frames are written directly from the camera sensor to memory that the DSP can now read, in the format expected by the model, without any CPU involvement. This 16ms of overhead becomes 0ms, and the data processing time is reduced to the inference and NMS time.
 
-**•	The Vision:** The state of the art demands an integrated camera HAL that writes straight to typed tensor buffers residing inside Secure Enclave memory. This eliminates roughly 15–30ms of structural page-transfer latency.
 
 **•	The Engineering Barrier:** A universal host-compiled context binary (.bin) fails on custom enterprise warehouse devices because of low-level VTCM (Vector Tightly Coupled Memory) page layout negotiations. The operating system has to act as a translator between generic software (compilers) and highly customized hardware (firmware). Because of these deep, chip-specific differences, tools meant to run AI models on hardware (like Qualcomm's SNPE) must be built individually for every specific chip model.
 
 
 ### Prediction 2: On-Device Vision LoRA Fine-Tuning
 
-**•	As of May 2026:** YOLO11 detection heads are incredibly compact (consisting of less than a million total parameters in neural geometry). This represents an execution profile easily handled by gradient computation threads inside modern Hexagon accelerator blocks. This allows local training on a budget without cloud data transmission, similar to decentralized LoRA training I am running today on my PC, equiped with the small 4GB GPU (ex.: RTX 2050).
+**•	As of May 2026:**  The detection part (heads) of a YOLO11 model — the layer that decides "this is a box, this is damage" — is surprisingly small. It has fewer parameters than a typical spreadsheet has cells. Training just that part, rather than the whole model, is something a modern phone chip can do locally. This is the same idea behind LoRA fine-tuning, which today runs on my laptop GPU with 4GB of memory.
 
-**•	The Vision:** An edge-deployed box-damage model that auto-updates itself overnight using localized on-device HTP backend backpropagation. This bridges the extreme domain differences (lighting variation, packaging textures, camera lens distortions of individual industrial firmware SKUs) **without manual labeling**, keeping training weights and data completely local and safe.
+**•	The Vision:** A box-damage model deployed to a warehouse scanner that quietly improves itself overnight. It uses the frames it collected during the day — boxes it saw under the actual warehouse lighting, with the actual camera lens, in the actual packaging types that warehouse handles — to update its own weights. No images leave the device. **No one writes labels**. No data scientist is involved. The model that ships on day one gradually becomes a model tuned to that specific scanner in that specific location, without anyone touching it.
 
 
 ### Prediction 3: The End of the Format War 
 
-**•	As of May 2026:** Overcoming the cumbersome seven-stage conversion line (PyTorch, ONNX, TFLite, DLC files) with multiple target compilers that output diverging numerical met-rics is unsustainable.
+**•	As of May 2026:** Getting a YOLO model onto a Qualcomm DSP currently requires seven separate steps, three different file formats, and two conversion tools that sometimes disagree on the output. If any one step uses a slightly different SDK version, the whole pipeline breaks silently. This article documents several weeks of debugging that pipeline. It is not sustainable.
 
-**•	The Vision:** Pure, absolute standardization under a uniform execution block (such as ONNX Runtime's QNN Execution Provider). Standard SNPE/DLC manual conversions will eventual-ly be remembered like vendor-specific legacy OpenGL headers: necessary and revolutionary in their epoch, but eventually abstracted away by a unified runtime API
+**•	The Vision:** A single runtime that accepts a standard model file and handles everything else — choosing the right hardware, compiling for the specific chip, running inference. ONNX Runtime's QNN Execution Provider is the current best candidate. When it matures, the seven-step pipeline described in this article will look like what it is: a workaround for a problem that should not exist. Just as developers no longer write GPU code for each graphics card manufacturer separately, they should not need to write separate ML pipelines for each chip vendor.
 
 
 ### Prediction 4: Context-Aware Self-Calibration on the Edge
 
-**•	As of May 2026:** INT8 quantization currently relies on offline calibration image tensors inside a host developer machine, producing a static compromise that ignores the raw real-world con-text of individual deployments.
+**•	As of May 2026:** When a model is quantized from 32-bit float to 8-bit integer, it needs calibration images — a sample of real-world inputs — to set the right numerical ranges. Those images are collected by a developer, on a development machine, before deployment. The model ships with those ranges baked in permanently, even if the warehouse it ends up in has different lighting, different boxes, and a different camera than the calibration dataset.
 
-**•	The Vision:** Quantized networks that self-calibrate after initial deployment by leveraging the first 1,000 real-world frames parsed by the scanner to dynamically calculate scale coeffi-cients. Running localized post-training calibration arrays of 1,000 frames at stride-8 on the modern Hexagon HTP takes less than 10 seconds, eliminating manual, multi-warehouse da-taset calibration tasks.
+**•	The Vision:** QA model that calibrates itself after it arrives. During its first day of use, it quietly processes 1000 real frames in the background and uses them to tune its own numerical ranges for the actual conditions it is operating in. On a Hexagon 780, this takes under 10 seconds of background processing. The model that runs on day two is numerically tuned to that specific scanner's real environment — not to a lab dataset collected months earlier.
 
 
 ### Prediction 5: Mandatory NNAPI NPU Routing Checkpoints
 
-**•	As of May 2026:** Over eight years, NNAPI on industrial enterprise Qualcomm system stacks has been a mirage, defaulting to clean model compilation only to silently redirect execution pipeline graphs to the host CPU cores.
+**•	As of May 2026:** Over eight years, NNAPI on industrial enterprise Qualcomm system stacks has been a mirage, defaulting to clean model compilation only to silently redirect execution pipeline graphs to the host CPU cores. NNAPI is the Android API that is supposed to route model inference to whatever hardware accelerator the device has — GPU, DSP, or dedicated AI chip. It has existed since Android 8.1 in 2017. In every measurement in this article, across four devices and eight years, NNAPI routed to the CPU. Not because the hardware was missing — the same DSP running at 4.5ms via the Qualcomm SDK was invisible to NNAPI. The NNAPI path was always slower than plain CPU code, because it added framework overhead on top of a CPU fallback.
 
-**•	The Vision:** Future Android CDD (Compatibility Definition Document) revisions should man-date that any SoC marketed with "artificial intelligence" silicon has a non-optional, CTS-verified hardware delegation path through NNAPI. Accelerated execution must stop being a marketing gimmick or a firmware mystery.
+**•	The Vision:** Android's compatibility requirements should mandate that any device marketed with an AI accelerator must actually route NNAPI calls to that accelerator, verified by a test that Google runs before approving the device. "AI-capable" on the box should mean the standard API reaches the hardware — not that a vendor SDK exists for developers willing to spend weeks learning it.
 
 
 ---
