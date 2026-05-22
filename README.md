@@ -114,6 +114,12 @@ All times shown as **total pipeline ; model-only** in milliseconds. Total includ
 
 #### YOLO11n — all devices, all accelerators
 
+
+
+<img width="1270" height="822" alt="image" src="https://github.com/user-attachments/assets/856bc349-12f1-4a0e-a418-13931913f32b" />
+
+
+
 | Device | CPU FP32 | CPU iquant | GPU FP16 | GPU INT8 | NPU iquant | QNN DSP |
 |---|---|---|---|---|---|---|
 | CT70 QCS6690 | 220; **200** | 120; **70** | 95; 45 | 95; **45** | 140; **91** | 22; **6** |
