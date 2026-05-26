@@ -138,7 +138,7 @@ All times shown as **total pipeline ; model-only** in milliseconds. Total includ
 
 **Record:** S21 YOLO11n box-4class QNN DSP = **2.9ms model, 19ms total**.
 
-### Key observations from the full dataset
+### Key observations from the full dataset:
 
 **DSP speedup vs CPU has grown since 2018.** Comparing model-only times  (apples-to-apples):
 
