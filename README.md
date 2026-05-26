@@ -294,7 +294,7 @@ The screenshot from that video — all four devices detecting the same scene sim
 
 Eight years between articles is too long. Here is what needs to happen in the next four. Five wishes or five predictions which would help to develop computer vision solutions on the edge.
 
-### Prediction 1: NPU-Native OS Buffers (my wish)
+### Prediction 1: NPU-Native OS Buffers
 
 **•	As of May 2026:** Every video frame from the camera goes through several CPU preparation steps before the DSP sees a single pixel. CameraX delivers frames in YUV format. The code resizes from 1080p to 640×640, extracts pixel values one by one, packs them into the uint8 format the model expects, and allocates a fresh 5MB ByteBuffer to hold the result — at 30fps, that is 150MB per second of short-lived heap allocations the garbage collector must eventually reclaim. Only after all of that does the DSP start its actual inference work. In the measurements in this article, these preparation steps cost 16ms on every device. The 2.5ms DSP inference on S21 delivers a 19ms total pipeline — not 2.5ms — because of this overhead.
 
